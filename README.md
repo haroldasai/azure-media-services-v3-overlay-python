@@ -4,6 +4,7 @@
 
 * Install Python 3.x
 * Install the Python SDKs<br>
+
 pip3 install azure-mgmt-resource<br>
 pip3 install azure-mgmt-media==3.0.0<br>
 pip3 install azure-identity<br>
@@ -29,6 +30,7 @@ STORAGEACCOUNTKEY="XXXXX"
 ### Execute
 
 Go to project directory and run<br>
+
 $python overlay-encoding.py<br>
 Getting .env values<br>
 Creating AMS client<br>
