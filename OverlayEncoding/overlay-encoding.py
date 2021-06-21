@@ -117,6 +117,7 @@ print("Creating input asset " + in_asset_name)
 # create_or_update(resource_group_name, account_name, asset_name, parameters, custom_headers=None, raw=False, **operation_config)
 inputAsset = client.assets.create_or_update(resource_group_name, account_name, in_asset_name, input_asset)
 #+++Create an input logoAsset
+print("Creating input asset " + in_asset_name_logo)
 inputAssetLogo = client.assets.create_or_update(resource_group_name, account_name, in_asset_name_logo, input_asset_logo)
 
 # An AMS asset is a container with a specfic id that has "asset-" prepended to the GUID.
