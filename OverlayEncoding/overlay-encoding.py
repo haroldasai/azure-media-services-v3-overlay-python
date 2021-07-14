@@ -7,8 +7,7 @@ from azure.mgmt.media.models import (
   Asset,
   Transform,
   TransformOutput,
-  BuiltInStandardEncoderPreset,
-  ## classes for transform
+  ## classes for custom transform
   StandardEncoderPreset,
   Filters,
   VideoOverlay,
@@ -69,9 +68,9 @@ credentials = AdalAuthentication(
     key
 )
 
-# The video file & overlay logo file(png etc.)you want to upload.  For this example, put the file in the same folder as this script. 
-# The file ignite.mp4 has been provided for you. 
-source_file = "sample_globe.mp4"
+# The video file & overlay logo image file(.png etc.)you want to upload.  For this example, put the file in the same folder as this script. 
+# The file ignite.mp4 & cloud.png has been provided for you. 
+source_file = "ignite.mp4"
 source_file_logo = "cloud.png"
 
 # Generate a random number that will be added to the naming of things so that you don't have to keep doing this during testing.
@@ -82,25 +81,26 @@ in_asset_name = 'inputassetName' + str(thisRandom)
 in_alternate_id = 'inputALTid' + str(thisRandom)
 in_description = 'inputdescription' + str(thisRandom)
 
-#+++Set the attributes of the input logo Asset using the random number
+#++ Set the attributes of the input logo Asset using the random number
 in_asset_name_logo = 'inputlogoassetName' + str(thisRandom)
 in_alternate_id_logo = 'inputlogoALTid' + str(thisRandom)
 in_description_logo = 'inputlogodescription' + str(thisRandom)
-#+++Set label name to add to the job input asset of overlay image 
+#++ Set label name to add to the job input asset of overlay image 
 in_label_name_logo = "logo"
 
-# Create an Asset object
+# Create an Asset object for the video & logo
 # From the SDK
 # Asset(*, alternate_id: str = None, description: str = None, container: str = None, storage_account_name: str = None, **kwargs) -> None
 # The asset_id will be used for the container parameter for the storage SDK after the asset is created by the AMS client.
 input_asset = Asset(alternate_id=in_alternate_id,description=in_description)
-
 input_asset_logo = Asset(alternate_id=in_alternate_id_logo,description=in_description_logo)
 
 # Set the attributes of the output Asset using the random number
 out_asset_name = 'outputassetName' + str(thisRandom)
 out_alternate_id = 'outputALTid' + str(thisRandom)
 out_description = 'outputdescription' + str(thisRandom)
+
+# Create an Asset object for the output
 # From the SDK
 # Asset(*, alternate_id: str = None, description: str = None, container: str = None, storage_account_name: str = None, **kwargs) -> None
 output_asset = Asset(alternate_id=out_alternate_id,description=out_description)
@@ -116,7 +116,7 @@ print("Creating input asset " + in_asset_name)
 # From SDK
 # create_or_update(resource_group_name, account_name, asset_name, parameters, custom_headers=None, raw=False, **operation_config)
 inputAsset = client.assets.create_or_update(resource_group_name, account_name, in_asset_name, input_asset)
-#+++Create an input logoAsset
+# ++ Create an input logoAsset
 print("Creating input asset " + in_asset_name_logo)
 inputAssetLogo = client.assets.create_or_update(resource_group_name, account_name, in_asset_name_logo, input_asset_logo)
 
@@ -163,15 +163,11 @@ with open(source_file_logo, "rb") as data:
 
 
 
-### Create a Transform ###
-transform_name='MyOverlayTransform' + str(thisRandom)
+### Create a custom Transform ###
+transform_name='MyTransformWithOverlay' + str(thisRandom)
 # From SDK
 # TransformOutput(*, preset, on_error=None, relative_priority=None, **kwargs) -> None
-#transform_output = TransformOutput(preset=BuiltInStandardEncoderPreset(preset_name="AdaptiveStreaming"))
-
-# From SDK
-# TransformOutput(*, preset, on_error=None, relative_priority=None, **kwargs) -> None
-## ++Customer Transform for Overlay 
+## ++ Custom Transform with Overlay image
 transform_output = TransformOutput(
     preset=StandardEncoderPreset(
         filters=Filters(overlays=[VideoOverlay(input_label=in_label_name_logo)]),
@@ -186,13 +182,13 @@ print("Creating transform " + transform_name)
 transform = client.transforms.create_or_update(resource_group_name=resource_group_name,account_name=account_name,transform_name=transform_name,outputs=[transform_output])
 
 ### Create a Job ###
-job_name = 'MyOvarlayJob'+ str(thisRandom)
-print("Creating  overlay job " + job_name)
+job_name = 'MyOvarlayEncodingJob'+ str(thisRandom)
+print("Creating overlay encoding job " + job_name)
 files = (source_file)
 # From SDK
 # JobInputAsset(*, asset_name: str, label: str = None, files=None, **kwargs) -> None
-# ++pass label name to JobInputAsset
 input = JobInputAsset(asset_name=in_asset_name)
+# ++ pass label name for overlay input asset
 overlay = JobInputAsset(asset_name=in_asset_name_logo, label=in_label_name_logo)
 
 # From SDK
@@ -200,7 +196,7 @@ overlay = JobInputAsset(asset_name=in_asset_name_logo, label=in_label_name_logo)
 outputs = JobOutputAsset(asset_name=out_asset_name)
 # From SDK
 # Job(*, input, outputs, description: str = None, priority=None, correlation_data=None, **kwargs) -> None
-#++ create JobInputs object and add video asset and log asset to it
+# ++ create JobInputs object and add video asset and log asset to it
 theJob = Job(input=JobInputs(inputs=[input,overlay]), outputs=[outputs])
 # From SDK
 # Create(resource_group_name, account_name, transform_name, job_name, parameters, custom_headers=None, raw=False, **operation_config)
